@@ -14,7 +14,7 @@ shift
 rpc_port=$1
 shift
 
-date_tag=$(date "+%c%y%m%d-%H%M%S" | cut -d ' ' -f 5)
+date_tag=$(date +%Y-%m-%d' '%H:%M:%S)
 
 data_directory=$root/data/$id       
 log_directory=$root/log/$id    
