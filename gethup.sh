@@ -1,9 +1,9 @@
 # !/bin/bash
-# Usage: bash gethup.sh <root> <id> <network_id> <genesis_file> <port> <rpc_port> <geth_parameters>
+# Usage: bash gethup.sh <root> <node_id> <network_id> <genesis_file> <port> <rpc_port> <geth_parameters>
 
 root=$1
 shift
-id=$1
+node_id=$1
 shift
 network_id=$1
 shift
@@ -16,8 +16,8 @@ shift
 
 date_tag=$(date +%Y-%m-%d' '%H:%M:%S)
 
-data_directory=$root/data/$id       
-log_directory=$root/log/$id    
+data_directory=$root/data/$node_id       
+log_directory=$root/log/$node_id    
 mkdir -p $data_directory
 mkdir -p $log_directory
 
@@ -26,37 +26,41 @@ link_log_file=$log_directory/current.log
 stable_log_file=$log_directory/stable.log   
 ln -sf "$log_file" "$link_log_file"
 
-password=$id
+password=$node_id
 
-if [ ! -d "$root/keystore/$id" ]; then
+if [ ! -d "$root/keystore/$node_id" ]; then
   echo "==== Initializing node with genesis blockchain file"
   geth --datadir $data_directory init $genesis_file
     
-  echo "==== Creating an account with password $id [NEVER USE THIS LIVE]"
-  mkdir -p $root/keystore/$id
-  geth --datadir $data_directory --password <(echo -n $id) account new 
-  cp -R "$data_directory/keystore" $root/keystore/$id
+  echo "==== Creating an account with password $node_id [NEVER USE THIS LIVE]"
+  mkdir -p $root/keystore/$node_id
+  geth --datadir $data_directory --password <(echo -n $node_id) account new 
+  cp -R "$data_directory/keystore" $root/keystore/$node_id
 fi
 
-cp -R $root/keystore/$id/keystore/ $data_directory/keystore/
+cp -R $root/keystore/$node_id/keystore/ $data_directory/keystore/
 
 key=$(geth --datadir $data_directory account list | head -n1 | perl -ne '/([a-f0-9]{40})/ && print $1')
 
 echo "==== Launching"
 echo "geth --datadir $data_directory \
-  --identity $id \
+  --identity $node_id \
   --networkid $network_id \
   --port $port \
   --unlock $key \
-  --password <(echo -n $id) \
+  --password <(echo -n $node_id) \
   --nodiscover \
-  --rpc --rpcport $rpc_port --rpccorsdomain '*' $*"
+  --rpc \
+  --rpcport $rpc_port \
+  --rpccorsdomain '*' $*"
 geth --datadir $data_directory \
-  --identity $id \
+  --identity $node_id \
   --networkid $network_id \
   --port $port \
   --unlock $key \
-  --password <(echo -n $id) \
+  --password <(echo -n $node_id) \
   --nodiscover \
-  --rpc --rpcport $rpc_port --rpccorsdomain '*' $* \
+  --rpc \
+  --rpcport $rpc_port \
+  --rpccorsdomain '*' $* \
   2>&1 | tee "$stable_log_file" > "$log_file" &

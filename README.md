@@ -11,39 +11,44 @@ Ethereum utilities, dev tools, scripts, etc.
 ### Launch an instance
 
 ```
-bash /path/to/eth-utils/gethup.sh <root> <id> <network_id> <genesis_file> <port> <rpc_port> <geth_parameters>
+bash /path/to/eth-utils/gethup.sh <root> <node_id> <network_id> <genesis_file> <port> <rpc_port> <geth_parameters>
 ```
 
-This will:
+This will
 - if its the first launch it will initialize the node with `<genesis_file>`,
-- if it does not exist yet, then create an account with password `<id>` (**never use this live**),
-- bring up a node
-	- using `<root>/<id>` as data directory (where blockchain etc. are stored),
-	- with instance id `<id>`,
+- if it does not exist yet, then create an account with password `<node_id>` (**never use this live**),
+- bring up a local node
+	- using `<root>/<node_id>` as data directory (where blockchain etc. are stored),
+	- with instance id `<node_id>`,
 	- with networkid `<network_id>`,
 	- using `<genesis_file>` to initialize the node's blockchain file,
-	- listening on port `<port>`,
-	- with a JSON-RPC server on port `<rpc_port>`
+	- with network listening port `<port>`,
+	- with HTTP-RPC server listening port `<rpc_port>`,
 	- with the parameters determined on `<geth_parameters>`,
-	- with the account unlocked and
-	- with peer discovery mechanism disabled, and
-- save logs on `<root>/logs/<id>/<date>.log`.
+	- with the account unlocked,
+	- with peer discovery mechanism disabled and
+	- accepting cross origin requests from any domain, and
+- save logs on `<root>/logs/<node_id>/<date> <time>.log`.
 
 ### Launch a cluster 
 
 ```
-bash /path/to/eth-utils/gethcluster.sh <root> <number_of_nodes> <network_id> <genesis_file> <ip> <geth_parameters>
+bash /path/to/eth-utils/gethcluster.sh <root> <number_of_nodes> <network_id> <genesis_file> <geth_parameters>
 ```
 
 This will set up a local cluster of nodes
 - with `<root>` as the root directory where the cluster's nodes are set up, 
 - with `<number_of_nodes>` nodes,
 - with `<network_id>` as networkid,
-- using `<genesis_file>` to initialize very node's blockchain file,
-- collecting the nodes's enodes so they get connected to each other resulting in a private isolated network (it will use `<ip>` to construct the enode URL, as explained [here](https://github.com/ethereum/go-ethereum/wiki/Setting-up-private-network-or-local-cluster)),
+- using `<genesis_file>` to initialize every node's blockchain file,
+- collecting the nodes's enodes so they get connected to each other resulting in a private isolated network (it will use `<localhost>` to construct the enode URL, as explained [here](https://github.com/ethereum/go-ethereum/wiki/Setting-up-private-network-or-local-cluster)),
+- with network listening ports `31101`, `31102`, ..., and `31100 + <number_of_nodes>`,
+- with HTTP-RPC server listening ports `8100`, `8101`, ..., `8100 + <number_of_nodes>`,
 - with the parameters determined on `<geth_parameters>`,
-- listening on ports `31101`, `31102`, ..., and `31100 + <number_of_nodes>`, and
-- with JSON-RPC servers on ports `8100`, `8101`, ..., `8100 + <number_of_nodes>`.
+- with accounts unlocked,
+- with peer discovery mechanism disabled and
+- accepting cross origin requests from any domain.
+
 
 The cluster can be killed with `killall -QUIT geth`. Using the `-QUIT` signal dumps a stacktrace into each node's log file.
 
